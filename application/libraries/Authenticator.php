@@ -17,15 +17,21 @@ class Authenticator {
     }
 
     public function isLoggedIn() {
-        return $this->ci->session->userdata('logged_in_user') != NULL;
+        return $this->ci->session->userdata(SESSION_IS_LOGGED_IN) == true;
     }
 
     public function isAdminLoggedIn() {
-        return $this->ci->session->userdata('logged_in_user') != 'admin';
+        return $this->isLoggedIn() && ($this->ci->session->userdata(SESSION_LOGGED_IN_USERNAME) == 'admin');
     }
-    
-    public function doLogin($username, $password){
-        
+
+    public function storeLoginInfo($userInfo) {
+        $this->ci->session->set_userdata(SESSION_IS_LOGGED_IN, TRUE);
+        $this->ci->session->set_userdata(SESSION_LOGGED_IN_USERNAME, $userInfo['username']);
+    }
+
+    public function clearLoginInfo() {
+        $this->ci->session->unset_userdata(SESSION_IS_LOGGED_IN);
+        $this->ci->session->set_userdata(SESSION_LOGGED_IN_USERNAME);
     }
 
 }

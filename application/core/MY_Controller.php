@@ -12,10 +12,10 @@ class MY_Controller extends CI_Controller {
 
     private $sidebarMenus;
     private $pageTitle;
+    private $messages;
 
     public function __construct() {
         parent::__construct();
-
 
         $this->pageTitle = "Personal Assistance";
     }
@@ -27,14 +27,29 @@ class MY_Controller extends CI_Controller {
         $this->sidebarMenus = array_merge($this->sidebarMenus, $sMenus);
     }
 
-    public function showView($view, $data = array()) {
+    public function addMessage($type, $message) {
+        $this->messages[$type] = $message;
+    }
+
+    public function showView($view = NULL, $data = array()) {
+        if(!$this->authenticator->isLoggedIn()){
+            $this->load->helper('form');
+        }
+        
         $this->load->view('header', array(
             'pageTitle' => $this->pageTitle,
             'isLoggedIn' => $this->authenticator->isLoggedIn(),
-            'sidebarMenus' => $this->sidebarMenus
+            'sidebarMenus' => $this->sidebarMenus,
+            'messages' => $this->messages
         ));
 
-        $this->load->view($view, $data);
+        if ($this->authenticator->isLoggedIn() && $view != NULL) {
+            $this->load->view($view, $data);
+        } else {
+            $this->load->view('public', array(
+                'ipAddress' => $this->input->ip_address()
+            ));
+        }
         $this->load->view('footer');
     }
 
