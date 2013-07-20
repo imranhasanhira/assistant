@@ -63,15 +63,12 @@ class Financials extends MY_Controller {
             return;
         }
 
-        $categoryID = NULL;
-        $offset = 0;
-        $limit = TRANSACTION_PAGINATION_LIMIT;
-        $mode = $this->input->post('mode');
-        if ($mode == 'list-transactions') {
+        $offset = $page * $limit;
+        if (isset($categoryID)) {
             $this->load->library('form_validation');
             $this->form_validation->set_rules('category-id', 'Category', 'numeric|xss_clean');
             $this->form_validation->set_rules('page', 'Page', 'numeric');
-            $this->form_validation->set_rules('limit', 'Max count', 'numeric|less_than[1000]');
+            $this->form_validation->set_rules('limit', 'Max count', 'numeric|greater_than[0]|less_than[1000]');
             if ($this->form_validation->run() == FALSE) {
                 $this->addMessage('error', $this->form_validation->error_string());
             } else {
@@ -83,13 +80,22 @@ class Financials extends MY_Controller {
 
 
         $this->load->model('financial_transactions');
-        $totalTransactionsCount = $this->finanacial_transactions->getTotalTransactionsCount($accountID);
-        $transactions = $this->financial_transaciton->getTransactions($accountID, $categoryID, $offset, $limit);
+        $totalTransactionsCount = $this->financial_transactions->getTotalTransactionCount($accountID);
+        $transactions = $this->financial_transactions->getTransactions($accountID, $categoryID, $offset, $limit);
+        $currentPage = $offset / $limit;
 
-        $this->showView('financials/account', array(
+        $this->showView('financials/account_details', array(
             'totalTransactionsCount' => $totalTransactionsCount,
-            'transactions' => $transactions
+            'account' => $account,
+            'transactions' => $transactions,
+            'totalTransactionCount' => $totalTransactionsCount,
+            'currentPage' => $currentPage,
+            'limit' => $limit
         ));
+    }
+
+    public function transaction() {
+        
     }
 
 }

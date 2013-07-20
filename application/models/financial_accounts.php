@@ -32,9 +32,9 @@ class Financial_accounts extends CI_Model {
         return $account;
     }
 
-    public function getAccount($userID, $accountName) {
-        $account['name'] = $accountName;
-        $account['accid'] = 'asasdfdsf';
+    public function getAccount($userID, $accountID) {
+        $account['name'] = 'Account name 0';
+        $account['accid'] = $accountID;
         return $account;
     }
 

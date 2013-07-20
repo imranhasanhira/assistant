@@ -23,29 +23,26 @@ class Financial_transactions extends CI_Model {
     }
 
     public function getTransactions($accountID, $categories = NULL, $limit = 0, $offset = 0) {
-        $transactions['0'] = array(
-            'categoryID' => 0,
-            'secondaryAccountID' => 2,
-            'title' => 'transaction title',
-            'description' => 'transaction description 0',
-            'amount' => 100,
-            'date' => date()
-        );
-
-        $transactions['1'] = array(
-            'categoryID' => 0,
-            'secondaryAccountID' => 2,
-            'title' => 'transaction title 2',
-            'description' => 'transaction description 1',
-            'amount' => 50,
-            'date' => date()
-        );
-
+        $transactions = array();
+        for ($i = 0; $i < 5; $i++) {
+            $transactions[$i] = array(
+                'category' => 'cat-' . rand(1, 10),
+                'secondaryAccountID' => rand(1, 7),
+                'title' => 'transaction title ' . $i,
+                'description' => 'transaction description ' . $i,
+                'amount' => rand(1, 1000),
+                'date' => date('d M, Y')
+            );
+        }
         return $transactions;
     }
-    
-    public function getBorrowedAmount(){
-        
+
+    public function getBorrowedAmount() {
+        return 100;
+    }
+
+    public function getTotalTransactionCount() {
+        return 1000;
     }
 
 }
