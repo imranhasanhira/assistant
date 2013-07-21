@@ -16,14 +16,16 @@ class Users extends CI_Model {
 
     public function doLoginWithUsername($username, $passwordHash) {
         return array(
-            'username' => $username
+            'username' => $username,
+            'id' => 2
         );
     }
 
     public function doLoginWithEmail($email, $passwordHash) {
         return array(
             'username' => $username,
-            'email' => $email
+            'email' => $email,
+            'id' => 1
         );
     }
 

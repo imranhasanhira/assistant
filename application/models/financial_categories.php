@@ -10,6 +10,10 @@ if (!defined('BASEPATH'))
 
 class Financial_categories extends CI_Model {
 
+    private $systemCategoryIDs = array(
+        2, 4
+    );
+
     public function __construct() {
         parent::__construct();
     }
@@ -24,6 +28,14 @@ class Financial_categories extends CI_Model {
             return $categories;
         }
         return NULL;
+    }
+
+    public function getNonSystemCategories($userID) {
+        $categories = $this->getCategories($userID);
+        foreach ($this->systemCategoryIDs as $systemCategoryID) {
+            unset($categories[$systemCategoryID]);
+        }
+        return $categories;
     }
 
 }

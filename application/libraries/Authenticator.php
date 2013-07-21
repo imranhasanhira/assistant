@@ -27,6 +27,7 @@ class Authenticator {
     public function storeLoginInfo($userInfo) {
         $this->ci->session->set_userdata(SESSION_IS_LOGGED_IN, TRUE);
         $this->ci->session->set_userdata(SESSION_LOGGED_IN_USERNAME, $userInfo['username']);
+        $this->ci->session->set_userdata(SESSION_LOGGED_IN_USER_ID, $userInfo['id']);
     }
 
     public function clearLoginInfo() {

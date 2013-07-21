@@ -7,33 +7,40 @@ if (!defined('BASEPATH'))
  * and open the template in the editor.
  */
 
-function getItem($url, $text, $attribute = '') {
-    return '<li ' . $attribute . '><a href = "' . $url . '">' . $text . '</a></li>';
+function getURL($accountID, $currentCategoryID, $curPageNum, $lim) {
+    return site_url('financials/account/' . $accountID . '?category=' . $currentCategoryID . '&page=' . $curPageNum . '&limit=' . $lim);
 }
 
-function getTransactionPaginationString($url, $totalCount, $currentPage, $pageSize) {
+function getItem($url, $text, $attribute = '') {
+    return '<li ' . $attribute . '><a href = "' . $url . '" title="Page '.$text.'" >' . $text . '</a></li>';
+}
 
-    $str = '<div class = "pagination"> <ul>';
+function getTransactionPaginationString($accountID, $currentCategoryID, $totalTransactionCount, $currentPage, $pageSize, $paginationRight = '') {
+
+    $str = '<div class = "pagination ' . $paginationRight . '"> <ul>';
 
     $halfCount = 2;
-    $startPage = max(0, $currentPage - $halfCount);
-    $totalPage = ceil($totalCount / $pageSize);
-    $finalPage = min($totalPage, $currentPage + 2 * $halfCount + 1);
-
-    //echo $totalCount . ' : ' . $pageSize . ' : ' . $totalPage . ' : ' . $startPage . ' : ' . $currentPage . ' : ' . $finalPage . '<br/>';
+    $totalPage = ceil($totalTransactionCount / $pageSize);
+    $startPage = max(0, min($currentPage - $halfCount, $totalPage - 2 * $halfCount - 1));
+    $finalPage = min($totalPage - 1, $startPage + 2 * $halfCount);
+//    echo $totalCount . ' : ' . $pageSize . ' : ' . $totalPage . ' : ' . $startPage . ' : ' . $currentPage . ' : ' . $finalPage . '<br/>';
     //leftest
-    $str .= getItem($url, '&laquo;', ($currentPage <= $halfCount ) ? 'class="disabled"' : '');
+    $str .= getItem(getURL($accountID, $currentCategoryID, 1, $pageSize), '&laquo;', ($currentPage <= $halfCount ) ? 'class="disabled"' : '');
 
     for ($i = $startPage; $i <= $finalPage; $i++) {
-        $str .= getItem($url, $i, ($i == $currentPage) ? 'class="active"' : '');
+        $str .= getItem(getURL($accountID, $currentCategoryID, $i + 1, $pageSize), $i + 1, ($i == $currentPage) ? 'class="active"' : '');
     }
 
     //rightest
-    $str .= getItem($url, '&raquo;', ($currentPage >= $totalPage - $halfCount - 1) ? 'class="disabled"' : '');
+    $str .= getItem(getURL($accountID, $currentCategoryID, $totalPage, $pageSize), '&raquo;', ($currentPage >= $totalPage - $halfCount - 1) ? 'class="disabled"' : '');
 
     $str .='</ul> </div>';
     return $str;
 }
+
+$paginationOptions = array(10, 20, 50, $pageSize, 100, 500);
+sort($paginationOptions, SORT_NUMERIC);
+$paginationOptions = array_unique($paginationOptions);
 ?>
 
 <div class="row">
@@ -61,21 +68,37 @@ function getTransactionPaginationString($url, $totalCount, $currentPage, $pageSi
 
 
 <div class="row">
-    <div class="span12">
+    <div class="span8 pull-left">
 
-        <form class="">
-            <select name="categories" multiple="multiple">
+        <form class="form-inline" action="<?php echo site_url('financials/account/' . $accountID); ?>">
+            <select name="category" title="Category of the transaction">
                 <option value="-1">All</option>
                 <?php
                 foreach ($categories as $categoryID => $categoryName) {
                     ?>
-                    <option value="<?php echo $categoryID; ?>" selected=""> <?php echo $categoryName; ?></option>
+                    <option value="<?php echo $categoryID; ?>" <?php if ($currentCategoryID == $categoryID) echo 'selected="selected"'; ?>"> <?php echo $categoryName; ?></option>
                     <?php
                 }
                 ?>
             </select>
+            <select class="input-mini" name="limit" title="Number of transactions shown on a page">
+                <?php
+                foreach ($paginationOptions as $paginationOption) {
+                    echo '<option value="' . $paginationOption . '" ' . ($paginationOption == $pageSize ? 'selected="selected"' : '') . '>' . $paginationOption . '</option>';
+                }
+                ?>
+            </select>
+            <button class="btn"> Show</button> 
 
         </form>
+    </div>
+    <div class="span4 pull-right pagination-topalign">
+        <?php echo getTransactionPaginationString($accountID, $currentCategoryID, $totalTransactionCount, $currentPage, $pageSize, 'pagination-right'); ?>
+    </div>
+</div>
+<div class="row">
+    <div class="span12">
+
 
         <?php
         if ($transactions != NULL) {
@@ -93,7 +116,10 @@ function getTransactionPaginationString($url, $totalCount, $currentPage, $pageSi
                 </thead>
                 <tbody>
                     <?php
+//                    $count = 0;
                     foreach ($transactions as $transactionID => $transaction) {
+//                        $count++;
+//                        if($count>$pageSize)break;
                         ?>
                         <tr>
                             <td><?php echo $transaction['date'] ?></td>
@@ -115,8 +141,8 @@ function getTransactionPaginationString($url, $totalCount, $currentPage, $pageSi
 </div>
 
 <div class="row">
-    <div class="span6 pull-right">
-        <?php echo getTransactionPaginationString(site_url(), $totalTransactionCount, $currentPage, $limit) ?>
+    <div class="span12 pagination-topalign pagination-centered">
+        <?php echo getTransactionPaginationString($accountID, $currentCategoryID, $totalTransactionCount, $currentPage, $pageSize); ?>
     </div>
 </div>
 
@@ -125,7 +151,7 @@ function getTransactionPaginationString($url, $totalCount, $currentPage, $pageSi
 
 <hr />
 <div class="">
-    <form method="post" class="form-inline" action="<?php echo site_url('financials/'); ?>">
+    <form method="post" class="form-inline" action="<?php echo site_url('financials/account/' . $accountID); ?>">
         <input type="text" name="name" value="<?php echo $account['name']; ?>" placeholder="Account name"/>
         <button class="btn"> Update account name</button>
         <input type="hidden" name="mode" value="editaccount"/>

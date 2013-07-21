@@ -18,7 +18,7 @@ class Financials extends MY_Controller {
     }
 
     public function index() {
-        $userID = $this->session->userdata(SESSION_LOGGED_IN_USERID);
+        $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
 
         $mode = $this->input->post('mode');
         if ($mode == 'newaccount') {
@@ -54,7 +54,7 @@ class Financials extends MY_Controller {
             return;
         }
 
-        $userID = $this->session->userdata(SESSION_LOGGED_IN_USERID);
+        $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
         $this->load->model('financial_accounts');
         $account = $this->financial_accounts->getAccount($userID, $accountID);
         if ($account == NULL) {
@@ -63,34 +63,41 @@ class Financials extends MY_Controller {
             return;
         }
 
-        $offset = $page * $limit;
-        if (isset($categoryID)) {
-            $this->load->library('form_validation');
-            $this->form_validation->set_rules('category-id', 'Category', 'numeric|xss_clean');
-            $this->form_validation->set_rules('page', 'Page', 'numeric');
-            $this->form_validation->set_rules('limit', 'Max count', 'numeric|greater_than[0]|less_than[1000]');
-            if ($this->form_validation->run() == FALSE) {
-                $this->addMessage('error', $this->form_validation->error_string());
-            } else {
-                $categoryID = $this->input->post('category-id');
-                $limit = $this->input->post('limit');
-                $offset = $this->input->post('page') * $limit;
-            }
+        $categoryID = filter_var($this->input->get('category', TRUE), FILTER_VALIDATE_INT);
+        if ($categoryID == FALSE || $categoryID < 0) {
+            $categoryID = -1;
         }
 
+        $limit = filter_var($this->input->get('limit', TRUE), FILTER_VALIDATE_INT);
+        if ($limit == FALSE || $limit <= 0 || $limit > TRANSACTION_PAGINATION_MAX_VALUE) {
+            $limit = TRANSACTION_PAGINATION_VALUE;
+        }
+
+        $page = filter_var($this->input->get('page', TRUE), FILTER_VALIDATE_INT);
+        if ($page == FALSE || $page < 0) {
+            $page = 0;
+        } else {
+            $page -=1;
+        }
+        $offset = $page * $limit;
 
         $this->load->model('financial_transactions');
         $totalTransactionsCount = $this->financial_transactions->getTotalTransactionCount($accountID);
         $transactions = $this->financial_transactions->getTransactions($accountID, $categoryID, $offset, $limit);
-        $currentPage = $offset / $limit;
+
+        $this->load->model('financial_categories');
+        $categories = $this->financial_categories->getCategories($userID);
 
         $this->showView('financials/account_details', array(
             'totalTransactionsCount' => $totalTransactionsCount,
             'account' => $account,
             'transactions' => $transactions,
             'totalTransactionCount' => $totalTransactionsCount,
-            'currentPage' => $currentPage,
-            'limit' => $limit
+            'currentPage' => $page,
+            'pageSize' => $limit,
+            'currentCategoryID' => $categoryID,
+            'categories' => $categories,
+            'accountID' => $accountID
         ));
     }
 

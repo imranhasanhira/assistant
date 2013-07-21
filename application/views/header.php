@@ -11,6 +11,7 @@ if (!defined('BASEPATH'))
         <link rel="stylesheet" href="<?php echo base_url(); ?>css/reset.css" />
         <link rel="stylesheet" href="<?php echo base_url(); ?>css/960.css" />
         <link href="<?php echo base_url(); ?>css/bootstrap.min.css" rel="stylesheet" media="screen"></link>
+        <link rel="stylesheet" href="<?php echo base_url(); ?>css/style.css" />
 
     </head>
     <body>

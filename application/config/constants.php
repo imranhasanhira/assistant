@@ -45,11 +45,12 @@ define('FOPEN_READ_WRITE_CREATE_STRICT', 'x+b');
  */
 
 define('SESSION_IS_LOGGED_IN', 'is_logged_in');
-define('SESSION_LOGGED_IN_USERID', 'logged_in_userid');
+define('SESSION_LOGGED_IN_USER_ID', 'logged_in_userid');
 define('SESSION_LOGGED_IN_USERNAME', 'logged_in_username');
 
 
-define('TRANSACTION_PAGINATION_LIMIT', 50);
+define('TRANSACTION_PAGINATION_MAX_VALUE', 1000);
+define('TRANSACTION_PAGINATION_VALUE', 50);
 
 
 /* End of file constants.php */
