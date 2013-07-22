@@ -28,13 +28,13 @@ class Financial_accounts extends CI_Model {
 
     public function addAccount($userID, $accountName) {
         $account['name'] = $accountName;
-        $account['accid'] = 'asasdfdsf';
+        $account['id'] = 0;
         return $account;
     }
 
     public function getAccount($userID, $accountID) {
         $account['name'] = 'Account name 0';
-        $account['accid'] = $accountID;
+        $account['id'] = $accountID;
         return $account;
     }
 

@@ -48,9 +48,13 @@ define('SESSION_IS_LOGGED_IN', 'is_logged_in');
 define('SESSION_LOGGED_IN_USER_ID', 'logged_in_userid');
 define('SESSION_LOGGED_IN_USERNAME', 'logged_in_username');
 
-
 define('TRANSACTION_PAGINATION_MAX_VALUE', 1000);
-define('TRANSACTION_PAGINATION_VALUE', 50);
+define('TRANSACTION_PAGINATION_VALUE', 10);
+
+define ('SORT_BY_DATE_DEC' , 'date-dec');
+define ('SORT_BY_DATE_INC' , 'date-inc');
+define ('SORT_BY_AMOUNT_DEC' , 'amount-dec');
+define ('SORT_BY_AMOUNT_INC' , 'amount-inc');
 
 
 /* End of file constants.php */

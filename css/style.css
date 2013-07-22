@@ -13,3 +13,7 @@ root {
 .pagination-topalign div.pagination{
     margin-top: 0;
 }
+
+.transaction-actions a{
+    margin-left: 10px;
+}

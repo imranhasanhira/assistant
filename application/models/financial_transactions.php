@@ -10,7 +10,7 @@ if (!defined('BASEPATH'))
 
 class Financial_transactions extends CI_Model {
 
-    private $totalTransactionCount = 50;
+    private $totalTransactionCount = 5;
 
     public function __construct() {
         parent::__construct();
@@ -31,9 +31,10 @@ class Financial_transactions extends CI_Model {
                 'category' => 'cat-' . rand(1, 10),
                 'secondaryAccountID' => rand(1, 7),
                 'title' => 'transaction title ' . $i,
-                'description' => 'transaction description ' . $i,
+                'description' => 'transaction description transaction description ' . $i,
                 'amount' => rand(1, 1000),
-                'date' => date('d M, Y')
+                'date' => date('d M, Y'),
+                'info' => 'This is bullshit'
             );
         }
         return $transactions;
@@ -45,6 +46,9 @@ class Financial_transactions extends CI_Model {
 
     public function getTotalTransactionCount() {
         return $this->totalTransactionCount;
+    }
+    public function trashTransaction($transactionID){
+        return FALSE;
     }
 
 }
