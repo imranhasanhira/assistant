@@ -7,10 +7,10 @@ if (!defined('BASEPATH'))
  * and open the template in the editor.
  */
 
-function itemStart($name = NULL) {
+function itemStart($name = NULL, $isRequired = FALSE) {
     echo '<div class="control-group">';
     if ($name != NULL) { {
-            echo '<label class="control-label" for="' . strtolower($name) . '">' . $name . '</label>';
+            echo '<label class="control-label" for="' . strtolower($name) . '">' . $name.' ' . ($isRequired ? '*' : '') . '</label>';
         }
     }
     echo '<div class="controls">';
@@ -22,33 +22,39 @@ function itemEnd() {
         </div>
         ';
 }
+
+var_dump($_POST);
 ?>
-<div class="row">
+<div class="row transaction-div">
     <?php echo form_open('financials/transaction/' . $type, array('class' => 'form-horizontal')); ?>
 
-    <?php itemStart('Title'); ?>
-    <input type="text" id="title" placeholder="Title">
+    <?php itemStart('Title', TRUE); ?>
+    <input type="text" name="title" placeholder="Title" value="<?php echo set_value('title'); ?>">
+    <?php echo form_error('title'); ?>
     <?php itemEnd(); ?>
 
     <?php itemStart('Description'); ?>
-    <textarea rows="2" id="description" placeholder="Description"></textarea>
+    <textarea rows="2" name="description" placeholder="Description" value="<?php echo set_value('description'); ?>"></textarea>
+    <?php echo form_error('description'); ?>
     <?php itemEnd(); ?>
 
-    <?php itemStart('Category'); ?>
+    <?php itemStart('Category' , TRUE); ?>
     <select name="category">
-        <option value="-5">Select a category</option>
+        <option value="0">Select a category</option>
         <?php
         foreach ($categories as $categoryID => $categoryName) {
             ?>
-            <option value="<?php echo $categoryID; ?>"><?php echo $categoryName; ?></option>
+            <option value="<?php echo $categoryID; ?>"   <?php echo set_select('category', $categoryID); ?>  ><?php echo $categoryName; ?></option>
             <?php
         }
         ?>
     </select>
+    <?php echo form_error('category'); ?>
     <?php itemEnd(); ?>
 
-    <?php itemStart('Amount'); ?>
-    <input type="number" name="amount" placeholder="Amount" />
+    <?php itemStart('Amount' , TRUE); ?>
+    <input type="number" name="amount" placeholder="Amount" value="<?php echo set_value('amount'); ?>"/>
+    <?php echo form_error('amount'); ?>
     <?php itemEnd(); ?>
 
     <?php itemStart(); ?>

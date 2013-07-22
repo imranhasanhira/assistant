@@ -38,6 +38,10 @@ class Financial_categories extends CI_Model {
         return $categories;
     }
 
+    public function getCategory($userID, $categoryID) {
+        return array($categoryID => 'hello');
+    }
+
 }
 
 ?>

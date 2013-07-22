@@ -14,6 +14,25 @@ root {
     margin-top: 0;
 }
 
-.transaction-actions a{
-    margin-left: 10px;
+.transaction-actions form{
+    display: inline;
+    margin: 0;
+    margin-right: 5px;
+}
+
+
+.transaction-actions button{
+    border: none;
+    background: none;
+    padding: 0;
+    line-height: normal;
+}
+
+.transaction-controlls form{
+    margin-right: 15px;
+}
+
+div.transaction-div p{
+    display: inline;
+    color: #E13300;
 }

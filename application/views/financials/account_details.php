@@ -49,24 +49,22 @@ $paginationOptions = array_unique($paginationOptions);
 <h2> Account : <?php echo $account['name']; ?></h2>
 
 <div class="row">
-    <div class="span12">
-        <form method="post" class="form-inline pull-left" action="<?php echo site_url('financials/transaction/add'); ?>">
+    <div class="span12 transaction-controlls">
+        <form class="pull-left" method="post" action="<?php echo site_url('financials/transaction/deposite'); ?>">
             <button class="btn btn-primary">Deposite</button>
-            <input type="hidden" name="mode" value="add"/>
-            <input type="hidden" name="type" value="deposite"/>
+            <input type="hidden" name="account-id" value="<?php echo $accountID; ?>"/>
         </form>
 
-        <form method="post" class="form-inline pull-left" action="<?php echo site_url('financials/transaction/add'); ?>">
+        <form method="post" class="pull-left" action="<?php echo site_url('financials/transaction/spend'); ?>">
             <button class="btn btn-primary">Spend</button>
-            <input type="hidden" name="mode" value="add"/>
-            <input type="hidden" name="type" value="spend"/>
+            <input type="hidden" name="account-id" value="<?php echo $accountID; ?>"/>
         </form>
 
-        <form method="post" class="form-inline pull-left" action="<?php echo site_url('financials/transaction/add'); ?>">
+        <form method="post" class="pull-left"  action="<?php echo site_url('financials/transaction/transfer'); ?>">
             <button class="btn btn-primary">Transfer</button>
-            <input type="hidden" name="mode" value="add"/>
-            <input type="hidden" name="type" value="transfer"/>
+            <input type="hidden" name="account-id" value="<?php echo $accountID; ?>"/>
         </form>
+
     </div>
 </div>
 <hr />
@@ -140,8 +138,16 @@ $paginationOptions = array_unique($paginationOptions);
                             <td><?php echo $transaction['description'] ?></td>
                             <td><?php echo $transaction['amount'] ?></td>
                             <td class="transaction-actions">
-                                <a href="<?php echo site_url('financials/transaction/edit/' . $transactionID); ?>"><i class="icon-edit"></i></a>
-                                <a href="<?php echo site_url('financials/transaction/trash/' . $transactionID); ?>"><i class="icon-trash"></i></a>
+                                <form method="post" action="<?php echo site_url('financials/transaction/edit'); ?>">
+                                    <button type="submit"><i class="icon-edit"></i></button>
+                                    <input type="hidden" name="transaction-id" valuke="<?php echo $transactionID; ?>" />
+                                </form>
+
+                                <form method="post" action="<?php echo site_url('financials/transaction/trash'); ?>">
+                                    <button type="submit"><i class="icon-trash"></i></button>
+                                    <input type="hidden" name="transaction-id" valuke="<?php echo $transactionID; ?>" />
+                                </form>
+                                
                                 <a class="disabled"><i class="icon-info-sign" title="<?php echo $transaction['info']; ?>"></i></a>
                             </td>
                             <td><?php echo $transactionID; ?></td>

@@ -11,7 +11,7 @@ if (!defined('BASEPATH'))
 class Financials extends MY_Controller {
 
     private $newTransactionModes = array('deposite', 'spend', 'transfer');
-    private $genericNewTransactionModes = array('borrow', 'pay-back', 'lend', 'lend-back');
+    private $specialTransactionModes = array('borrow', 'pay-back', 'lend', 'lend-back');
     private $existingTransactionModes = array('view', 'edit', 'trash');
 
     public function __construct() {
@@ -68,7 +68,7 @@ class Financials extends MY_Controller {
         $account = $this->financial_accounts->getAccount($userID, $accountID);
         if ($account == NULL) {
             $this->addMessage('error', 'Account not found.');
-            $this->showView('financials');
+            $this->index();
             return;
         }
 
@@ -152,17 +152,30 @@ class Financials extends MY_Controller {
 
         $mode = filter_var($this->input->post('mode', TRUE), FILTER_SANITIZE_STRING);
         if ($mode == 'formsubmit') {
-            $this->handleFormsubmit($firstParam);
-            return;
+            $transaction = $this->handleFormSubmit($firstParam);
+            if ($transaction != NULL) {
+                $this->load->model('financial_transactions');
+                $response = FALSE;
+                if ($firstParam == 'edit') {
+                    $response = $this->financial_transactions->updateTransaction($transaction);
+                } else {
+                    $response = $this->financial_transactions->insertTransaction($transaction);
+                }
+                if ($response == FALSE) {
+                    $this->addMessage('error', 'Transaction could not be saved.');
+                } else {
+                    $this->addMessage('success', 'Transaction saved successfully.');
+                    $this->account($transaction['account-id']);
+                    return;
+                }
+            }
         }
 
         $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
 
-
-
         if (in_array($firstParam, $this->newTransactionModes, TRUE)) {
             $type = $firstParam;
-            $accountID = filter_var($this->input->get('account-id', TRUE), FILTER_VALIDATE_INT);
+            $accountID = filter_var($this->input->post('account-id', TRUE), FILTER_VALIDATE_INT);
             $account = NULL;
             if ($accountID != FALSE) {
                 $this->load->model('financial_accounts');
@@ -174,11 +187,10 @@ class Financials extends MY_Controller {
                 return;
             }
             $this->showTransactionForm($account, $type);
-        } else if (in_array($firstParam, $this->genericNewTransactionModes, TRUE)) {
-            $type = $firstParam;
-            $this->showTransactionForm(NULL, $type);
+        } else if (in_array($firstParam, $this->specialTransactionModes, TRUE)) {
+            $this->showSpecialTransactionForm($firstParam);
         } else if (in_array($firstParam, $this->existingTransactionModes, TRUE)) {
-            $transactionID = filter_var($this->input->get('transaction-id', TRUE), FILTER_VALIDATE_INT);
+            $transactionID = filter_var($this->input->post('transaction-id', TRUE), FILTER_VALIDATE_INT);
             if ($transactionID != FALSE) {//transaction valid ID
                 $this->load->model('financial_transactions');
                 if ($firstParam == 'edit' || $firstParam == 'view') { //edit or view mode, so load transaction details from database
@@ -223,40 +235,81 @@ class Financials extends MY_Controller {
         ));
     }
 
-    private function handleFormsubmit($type) {
-        if (in_array($type, $this->newTransactionModes, TRUE)) {
+    private function handleFormSubmit($type) {
+        if (in_array($type, $this->newTransactionModes, TRUE) || $type == 'edit') {
 
-            $accountIDRule = array('account-id', 'Account', 'required|integer|callback_valid_account|xss_clean');
-            $secondaryAccountIDRule = array('secondary-account-id', 'Target Account', 'required|integer|callback_valid_account|xss_clean');
-            $titleRule = array('title', 'Title', 'required|max_length[50]|xss_clean');
-            $descriptionRule = array('description', 'Description', 'max_length[500]|xss_clean');
-            $categoryRule = array('category', 'Category', 'required|integer|callback_valid_category|xss_clean');
-            $amountRule = array('amount', 'Amount', 'required|numeric|xss_clean');
+            $accountIDRule = array(
+                'field' => 'account-id',
+                'label' => 'Account',
+                'rules' => 'required|integer|callback_valid_account|xss_clean'
+            );
+            $secondaryAccountIDRule = array(
+                'field' => 'secondary-account-id',
+                'label' => 'Target Account',
+                'rules' => 'required|integer|callback_valid_account|callback_different_than_primary|xss_clean'
+            );
+            $titleRule = array(
+                'field' => 'title',
+                'label' => 'Title',
+                'rules' => 'required|max_length[50]|xss_clean'
+            );
+            $descriptionRule = array(
+                'field' => 'description',
+                'label' => 'Description',
+                'rules' => 'max_length[500]|xss_clean'
+            );
+            $categoryRule = array(
+                'field' => 'category',
+                'label' => 'Category',
+                'rules' => 'required|integer|callback_valid_category|xss_clean'
+            );
+            $amountRule = array(
+                'field' => 'amount',
+                'label' => 'Amount',
+                'rules' => 'required|numeric|xss_clean'
+            );
             $rules['deposite'] = array($accountIDRule, $titleRule, $descriptionRule, $categoryRule, $amountRule);
             $rules['spend'] = $rules['deposite'];
             $rules['transfer'] = array($accountIDRule, $titleRule, $descriptionRule, $secondaryAccountIDRule, $amountRule);
 
 
             $this->load->library('form_validation');
-            if ($this->form_validation->run($rules[$type]) == FALSE) {
-                $this->addMessage('error', $this->form_validation->error_string());
-                return false;
-            }else{
-                $transaction['id'] = $this->input->post('account-id', TRUE);
+            $this->form_validation->set_rules($rules[$type]);
+            if ($this->form_validation->run() == FALSE) {
+                return NULL;
+            } else {
+
+                $transaction['account-id'] = $this->input->post('account-id', TRUE);
                 $transaction['title'] = $this->input->post('account-id', TRUE);
                 $transaction['description'] = $this->input->post('account-id', TRUE);
-                $transaction['category-id'] = $this->input->post('account-id', TRUE);
                 $transaction['amount'] = $this->input->post('account-id', TRUE);
-                $transaction['id'] = $this->input->post('account-id', TRUE);
+                if ($type == 'transfer') {
+                    $transaction['secondary-account-id'] = $this->input->post('secondary-account-id', TRUE);
+                } else {
+                    $transaction['category-id'] = $this->input->post('account-id', TRUE);
+                }
+                return $transaction;
             }
         }
     }
 
-    private function valid_category($categoryID) {
+    public function valid_category($categoryID) {
         $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
         $this->load->model('financial_categories');
         $category = $this->financial_categories->getCategory($userID, $categoryID);
         return $category != NULL;
+    }
+
+    public function valid_account($accountID) {
+        $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
+        $this->load->model('financial_accounts');
+        $account = $this->financial_accounts->getAccount($userID, $accountID);
+        return $account != NULL;
+    }
+
+    public function different_than_primary($secondaryAccountID) {
+        $accountID = filter_var($this->input->post('account-id', TRUE), FILTER_VALIDATE_INT);
+        return $accountID != $secondaryAccountID;
     }
 
     private function showTransactionDetails($transactionID) {

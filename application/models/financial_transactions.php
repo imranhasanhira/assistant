@@ -47,8 +47,17 @@ class Financial_transactions extends CI_Model {
     public function getTotalTransactionCount() {
         return $this->totalTransactionCount;
     }
-    public function trashTransaction($transactionID){
+
+    public function trashTransaction($transactionID) {
         return FALSE;
+    }
+
+    public function insertTransaction($transaction) {
+        return TRUE;
+    }
+
+    public function updateTransaction($transaction) {
+        return TRUE;
     }
 
 }
