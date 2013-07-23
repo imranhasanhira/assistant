@@ -10,7 +10,7 @@ if (!defined('BASEPATH'))
 function itemStart($name = NULL, $isRequired = FALSE) {
     echo '<div class="control-group">';
     if ($name != NULL) { {
-            echo '<label class="control-label" for="' . strtolower($name) . '">' . $name.' ' . ($isRequired ? '*' : '') . '</label>';
+            echo '<label class="control-label" for="' . strtolower($name) . '">' . $name . ' ' . ($isRequired ? '*' : '') . '</label>';
         }
     }
     echo '<div class="controls">';
@@ -25,6 +25,8 @@ function itemEnd() {
 
 var_dump($_POST);
 ?>
+
+
 <div class="row transaction-div">
     <?php echo form_open('financials/transaction/' . $type, array('class' => 'form-horizontal')); ?>
 
@@ -38,21 +40,50 @@ var_dump($_POST);
     <?php echo form_error('description'); ?>
     <?php itemEnd(); ?>
 
-    <?php itemStart('Category' , TRUE); ?>
-    <select name="category">
-        <option value="0">Select a category</option>
-        <?php
-        foreach ($categories as $categoryID => $categoryName) {
-            ?>
-            <option value="<?php echo $categoryID; ?>"   <?php echo set_select('category', $categoryID); ?>  ><?php echo $categoryName; ?></option>
-            <?php
-        }
+    <?php
+    if ($type == 'transfer') {
+        itemStart('Account to transfer', TRUE);
         ?>
-    </select>
-    <?php echo form_error('category'); ?>
-    <?php itemEnd(); ?>
+        <select name="secondary-account-id">
+            <option value="0">Select target account</option>
+            <?php
+            foreach (array_diff_key($accounts, array($account['id'] => '')) as $accID => $acc) {
+                ?>
+                <option value="<?php echo $accID; ?>"   <?php echo set_select('secondary-account-id', $accID); ?>  ><?php echo $acc['name']; ?></option>
+                <?php
+            }
+            ?>
+        </select>
+        <?php echo form_error('secondary-account-id'); ?>
+        <?php
+        itemEnd();
+    }
+    ?>
 
-    <?php itemStart('Amount' , TRUE); ?>
+    <?php
+    if ($type != 'transfer') {
+        itemStart('Category', TRUE);
+        ?>
+        <select name="category">
+            <option value="0">Select a category</option>
+            <?php
+            foreach ($categories as $categoryID => $categoryName) {
+                ?>
+                <option value="<?php echo $categoryID; ?>"   <?php echo set_select('category', $categoryID); ?>  ><?php echo $categoryName; ?></option>
+                <?php
+            }
+            ?>
+        </select>
+        <?php echo form_error('category'); ?>
+        <?php
+        itemEnd();
+    }
+    ?>
+
+
+
+
+    <?php itemStart('Amount', TRUE); ?>
     <input type="number" name="amount" placeholder="Amount" value="<?php echo set_value('amount'); ?>"/>
     <?php echo form_error('amount'); ?>
     <?php itemEnd(); ?>

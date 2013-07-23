@@ -56,6 +56,11 @@ define ('SORT_BY_DATE_INC' , 'date-inc');
 define ('SORT_BY_AMOUNT_DEC' , 'amount-dec');
 define ('SORT_BY_AMOUNT_INC' , 'amount-inc');
 
+define ('SYSTEM_CATEGORY_ID_BORROW' , 1);
+define ('SYSTEM_CATEGORY_ID_PAYBACK' , 2);
+define ('SYSTEM_CATEGORY_ID_LEND' , 3);
+define ('SYSTEM_CATEGORY_ID_LENDBACK' , 4);
+
 
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

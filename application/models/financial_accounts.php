@@ -21,14 +21,14 @@ class Financial_accounts extends CI_Model {
     }
 
     public function getAccounts($userID) {
-        $accounts['0'] = array('name' => 'Account name 0');
+        $accounts['2'] = array('name' => 'Account name 2');
         $accounts['1'] = array('name' => 'Account name 1');
         return $accounts;
     }
 
     public function addAccount($userID, $accountName) {
         $account['name'] = $accountName;
-        $account['id'] = 0;
+        $account['id'] = 1;
         return $account;
     }
 

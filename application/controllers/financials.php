@@ -228,16 +228,18 @@ class Financials extends MY_Controller {
         $this->load->helper('form');
         $this->load->model('financial_categories');
         $categories = $this->financial_categories->getCategories($userID);
+        $this->load->model('financial_accounts');
+        $accounts = $this->financial_accounts->getAccounts($userID);
         $this->showView('financials/new_transaction', array(
             'account' => $account,
             'type' => $type,
-            'categories' => $categories
+            'categories' => $categories,
+            'accounts' => $accounts
         ));
     }
 
     private function handleFormSubmit($type) {
         if (in_array($type, $this->newTransactionModes, TRUE) || $type == 'edit') {
-
             $accountIDRule = array(
                 'field' => 'account-id',
                 'label' => 'Account',
@@ -280,13 +282,14 @@ class Financials extends MY_Controller {
             } else {
 
                 $transaction['account-id'] = $this->input->post('account-id', TRUE);
-                $transaction['title'] = $this->input->post('account-id', TRUE);
-                $transaction['description'] = $this->input->post('account-id', TRUE);
-                $transaction['amount'] = $this->input->post('account-id', TRUE);
+                $transaction['title'] = $this->input->post('title', TRUE);
+                $transaction['description'] = $this->input->post('description', TRUE);
+                $transaction['amount'] = $this->input->post('amount', TRUE);
                 if ($type == 'transfer') {
+                    $transaction['category-id'] = SYSTEM_CATEGORY_ID_TRANSFER;
                     $transaction['secondary-account-id'] = $this->input->post('secondary-account-id', TRUE);
                 } else {
-                    $transaction['category-id'] = $this->input->post('account-id', TRUE);
+                    $transaction['category-id'] = $this->input->post('category-id', TRUE);
                 }
                 return $transaction;
             }
@@ -296,20 +299,36 @@ class Financials extends MY_Controller {
     public function valid_category($categoryID) {
         $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
         $this->load->model('financial_categories');
-        $category = $this->financial_categories->getCategory($userID, $categoryID);
-        return $category != NULL;
+        $isValid = $this->financial_categories->isUserDefinedCategory($userID, $categoryID);
+        if (!$isValid) {
+            $isValid = $this->financial_categories->isSystemCategory($categoryID);
+        }
+
+        if (!$isValid) {
+            $this->form_validation->set_message('valid_category', 'Category is required.');
+        }
+        return $isValid;
     }
 
     public function valid_account($accountID) {
         $userID = $this->session->userdata(SESSION_LOGGED_IN_USER_ID);
         $this->load->model('financial_accounts');
         $account = $this->financial_accounts->getAccount($userID, $accountID);
-        return $account != NULL;
+
+        $isValid = $account != NULL;
+        if (!$isValid) {
+            $this->form_validation->set_message('valid_account', 'Account is not valid.');
+        }
+        return $isValid;
     }
 
     public function different_than_primary($secondaryAccountID) {
         $accountID = filter_var($this->input->post('account-id', TRUE), FILTER_VALIDATE_INT);
-        return $accountID != $secondaryAccountID;
+        $isValid = $accountID != $secondaryAccountID;
+        if (!$isValid) {
+            $this->form_validation->set_message('different_than_primary', 'Please select a different account.');
+        }
+        return $isValid;
     }
 
     private function showTransactionDetails($transactionID) {
@@ -317,4 +336,5 @@ class Financials extends MY_Controller {
     }
 
 }
+
 ?>
